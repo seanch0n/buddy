@@ -28,7 +28,12 @@ fn main() {
         .help("run as a client to send files")
         .required(false);
     let app = app.arg(client_option);
-
+    let base64_encode_option = Arg::with_name("b64e")
+        .long("base64encode") // allow --client
+        .takes_value(true)
+        .help("base64 encode a string")
+        .required(false);
+    let app = app.arg(base64_encode_option);
     let matches = app.get_matches();
 
     let server = matches.is_present("server");
@@ -41,7 +46,14 @@ fn main() {
     } else if matches.is_present("server") {
         println!("recv_file is getting called!");
         recv_file(file_path.to_string());
+    } else if matches.is_present("b64e") {
+        let val = matches.value_of("b64e").expect("uhoh");
+        base64encode(val.to_string());
     }
+}
+
+fn base64encode(input: String) {
+    println!("{}", base64::encode(input));
 }
 
 fn send_file(file_path: &str) -> io::Result<()> {
