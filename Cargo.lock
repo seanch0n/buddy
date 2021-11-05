@@ -112,6 +112,7 @@ dependencies = [
  "base64",
  "checksums",
  "clap",
+ "snappy",
 ]
 
 [[package]]
@@ -389,6 +390,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "pkg-config"
+version = "0.3.22"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12295df4f294471248581bc09bef3c38a5e46f1e36d6a37353621a0c6c357e1f"
+
+[[package]]
 name = "ppv-lite86"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -498,6 +505,27 @@ checksum = "3b1a48b7e97a07b8f5771159e6914d8459557f8f833a60c4bd041f03736844f5"
 dependencies = [
  "rand",
  "rustc-serialize",
+]
+
+[[package]]
+name = "snappy"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b570b1d39e2fcb136a07e46d15a1fe962ba71c151e4d8d6888f59f1fcd185bb1"
+dependencies = [
+ "libc",
+ "snappy-sys",
+]
+
+[[package]]
+name = "snappy-sys"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f873053ef085548b0b924db3aa2ce38d9389fb3be353bf7fcec4ababc99a307"
+dependencies = [
+ "gcc",
+ "libc",
+ "pkg-config",
 ]
 
 [[package]]

@@ -1,6 +1,7 @@
 use base64::{decode, encode};
 use checksums::{hash_file, Algorithm::SHA1};
 use clap::{App, Arg};
+use snappy::{compress, uncompress};
 use std::fs;
 use std::fs::File;
 use std::io::{self, Read, Write};
@@ -57,27 +58,10 @@ fn send_file(file_path: &str) -> io::Result<()> {
 
     // create a payload that is the 'FileHashData'
     let payload = [file_hash_slice, &contents_slice].concat();
-    // then encode the payload
-    let encoded_payload = base64::encode(&payload);
+    let asdf = compress(&payload[..].as_bytes());
     // send it
-    tcp.write_all(&payload.as_bytes())?;
-    // loop {
-    //     let n = file.read(&mut buf)?;
-    //     if n == 0 {
-    //         // reached end of file
-    //         break;
-    //     }
-    //     // get the sha1 hash of the file being transferred
-    //     let file_hash = hash_file(path, SHA1);
-    //     let file_hash_slice: &str = &file_hash[..];
+    tcp.write_all(&asdf)?;
 
-    //     // create a payload that is the 'FileHashData'
-    //     let payload = [file_hash_slice.as_bytes(), &buf].concat();
-    //     // then encode the payload
-    //     let encoded_payload = base64::encode(&payload);
-    //     // send it
-    //     tcp.write_all(&encoded_payload[..n].as_bytes())?;
-    // }
     Ok(())
 }
 
@@ -96,8 +80,7 @@ fn recv_file(file_path: String) -> io::Result<()> {
 fn handle_connection(mut stream: TcpStream, file_path: String) {
     // let mut buffer = [0; 4096];
     let HASH_LENGTH = 40;
-    let mut data = vec![];
-    let mut data_len = 0usize;
+    let mut _data = vec![];
     let mut buf = [0; 4096];
 
     loop {
@@ -105,8 +88,9 @@ fn handle_connection(mut stream: TcpStream, file_path: String) {
         if n == 0 {
             break;
         }
-        data.extend_from_slice(&buf[..n]);
+        _data.extend_from_slice(&buf[..n]);
     }
+    let data = uncompress(&_data).unwrap();
 
     let path = Path::new("recvd.txt");
     fs::write(path, &data[HASH_LENGTH..]).expect("Unable to write file");
@@ -121,7 +105,7 @@ fn handle_connection(mut stream: TcpStream, file_path: String) {
         Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
     };
 
-    // confirm the hash
+    // confirm the hash and delete file if it doesn't match
     let file_hash = hash_file(path, SHA1);
     if file_hash != hash_s {
         println!("Bad file hashes! Removing file...");
