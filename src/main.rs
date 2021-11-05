@@ -28,7 +28,18 @@ fn main() {
         .help("run as a client to send files")
         .required(false);
     let app = app.arg(client_option);
-
+    let base64_encode_option = Arg::with_name("b64e")
+        .long("base64encode") // allow --client
+        .takes_value(true)
+        .help("base64 encode a string")
+        .required(false);
+    let app = app.arg(base64_encode_option);
+    let base64_decode_option = Arg::with_name("b64d")
+        .long("base64decode") // allow --client
+        .takes_value(true)
+        .help("base64 decode a string")
+        .required(false);
+    let app = app.arg(base64_decode_option);
     let matches = app.get_matches();
 
     let server = matches.is_present("server");
@@ -41,9 +52,26 @@ fn main() {
     } else if matches.is_present("server") {
         println!("recv_file is getting called!");
         recv_file(file_path.to_string());
+    } else if matches.is_present("b64e") {
+        let val = matches.value_of("b64e").expect("uhoh");
+        base64encode(val.to_string());
+    } else if matches.is_present("b64d") {
+        let val = matches.value_of("b64d").expect("uhoh");
+        base64decode(val.to_string());
     }
 }
 
+fn base64encode(input: String) {
+    println!("{}", base64::encode(input));
+}
+fn base64decode(input: String) {
+    let l = base64::decode(input).unwrap();
+    let s = match str::from_utf8(&l) {
+        Ok(v) => v,
+        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+    };
+    println!("{}", s);
+}
 fn send_file(file_path: &str) -> io::Result<()> {
     let path = Path::new(file_path);
     let mut file = File::open(path)?;
